@@ -22,13 +22,14 @@ class GuiForm(QtWidgets.QMainWindow):
 
         
         
-        self.ui.btnStart.clicked.connect(self.start_capturing_packets)
+        self.ui.btnStart.clicked.connect(self.choose_captured)
+        self.ui.btnCapture.clicked.connect(self.take_pic)
         # self.ui.lineEdit.textChanged.connect(self.set_filter_val)
         
     
     
 
-    def start_capturing_packets(self):
+    def choose_captured(self):
         print("start_capturing_packets")
         name, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open File', options=QtWidgets.QFileDialog.DontUseNativeDialog)
         print('opend file '+name)
@@ -58,6 +59,33 @@ class GuiForm(QtWidgets.QMainWindow):
 
 
     
+    def take_pic(self):
+        cam = cv2.VideoCapture(0)
+        frame = cam.read()[1]
+        cv2.imwrite(filename='img.jpg', img=frame)
+        cam.release()
+        imgOrigin=cv2.imread('img.jpg')
+        img = imutils.resize(imgOrigin,width=270,height=400)
+        image = QtGui.QImage(img, img.shape[1],\
+                        img.shape[0], img.shape[1] * 3,QtGui.QImage.Format_RGB888)
+        pix = QtGui.QPixmap(image)
+        pixmap = QtGui.QPixmap(pix)
+        self.ui.imgLabel.setPixmap(pixmap)
+        self.ui.imgLabel.show()
+            
+            
+        stext=process_img('img.jpg')
+        self.ui.scanned_view.setText(stext)
+        print(stext)
+        trText=translate(stext)
+            
+        print("===================")
+        print(trText)
+        self.ui.translated_view.setText(trText)
+        self.scannedText=stext
+        self.translatedText=trText
+        self.img=img
+
     def file_save_scanned(self):
         print("file_open")
         name, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Save Scanned', options=QtWidgets.QFileDialog.DontUseNativeDialog)
@@ -119,8 +147,12 @@ class Ui_Scanner(object):
         self.btnStart = QtWidgets.QPushButton(self.centralwidget)
         self.btnStart.setGeometry(QtCore.QRect(20, 10, 270, 30))
         self.btnStart.setObjectName("btnStart")
+        self.btnCapture = QtWidgets.QPushButton(self.centralwidget)
+        self.btnCapture.setGeometry(QtCore.QRect(20, 50, 270, 30))
+        self.btnCapture.setObjectName("btnCapture")
+        
         self.imgLabel=QtWidgets.QLabel(self.centralwidget)
-        self.imgLabel.setGeometry(QtCore.QRect(20, 50, 270, 400))
+        self.imgLabel.setGeometry(QtCore.QRect(20, 90, 270, 400))
         self.imgLabel.setObjectName("imgLabel")
         
         
@@ -172,6 +204,7 @@ class Ui_Scanner(object):
         _translate = QtCore.QCoreApplication.translate
         Scanner.setWindowTitle(_translate("Scanner", "Document Scanner and Translator"))
         self.btnStart.setText(_translate("Scanner", "Choose Picture"))
+        self.btnCapture.setText(_translate("Scanner", "Capture Picture"))
         
         self.menuFile.setTitle(_translate("Scanner", "File"))
         self.actionOpen.setText(_translate("Scanner", "Save Scanned"))
