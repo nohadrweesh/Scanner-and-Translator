@@ -5,6 +5,7 @@ import cv2
 import matplotlib.pyplot as plt
 import requests
 import imutils
+from BackThread import *
 
 
 class GuiForm(QtWidgets.QMainWindow):
@@ -24,13 +25,19 @@ class GuiForm(QtWidgets.QMainWindow):
         
         self.ui.btnStart.clicked.connect(self.choose_captured)
         self.ui.btnCapture.clicked.connect(self.take_pic)
-        # self.ui.lineEdit.textChanged.connect(self.set_filter_val)
+        self.backThread=BackThread()
+        self.backThread.start()
+        self.backThread.process_img.connect(self.show_scanned)
+        self.backThread.translate_txt.connect(self.show_translated)
         
     
-    
+    def show_scanned(self,scannedText):
+        self.ui.scanned_view.setText(scannedText)
+    def show_translated(self,translatedText):
+        self.ui.translated_view.setText(translatedText)
 
     def choose_captured(self):
-        print("start_capturing_packets")
+        print("start_process_img")
         name, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open File', options=QtWidgets.QFileDialog.DontUseNativeDialog)
         print('opend file '+name)
         if name != '':
@@ -43,21 +50,10 @@ class GuiForm(QtWidgets.QMainWindow):
             pixmap = QtGui.QPixmap(pix)
             self.ui.imgLabel.setPixmap(pixmap)
             self.ui.imgLabel.show()
+            self.backThread.img=name
+            self.backThread.isDone=False
             
-            print("img named "+name)
-            stext=process_img(name)
-            self.ui.scanned_view.setText(stext)
-            print(stext)
-            trText=translate(stext)
             
-            print("===================")
-            print(trText)
-            self.ui.translated_view.setText(trText)
-            self.scannedText=stext
-            self.translatedText=trText
-            self.img=img
-
-
     
     def take_pic(self):
         cam = cv2.VideoCapture(0)
@@ -72,19 +68,11 @@ class GuiForm(QtWidgets.QMainWindow):
         pixmap = QtGui.QPixmap(pix)
         self.ui.imgLabel.setPixmap(pixmap)
         self.ui.imgLabel.show()
+        self.backThread.img='img.jpg'
+        self.backThread.isDone=False
             
             
-        stext=process_img('img.jpg')
-        self.ui.scanned_view.setText(stext)
-        print(stext)
-        trText=translate(stext)
-            
-        print("===================")
-        print(trText)
-        self.ui.translated_view.setText(trText)
-        self.scannedText=stext
-        self.translatedText=trText
-        self.img=img
+        
 
     def file_save_scanned(self):
         print("file_open")
@@ -220,8 +208,7 @@ class Ui_Scanner(object):
 from PyQt5.QtCore import QObject, pyqtSignal
 
 if __name__ == "__main__":
-    # sniffer = Sniffer()
-    # sniffer.start()
+    
     import sys
     app = QtWidgets.QApplication(sys.argv)
     Scanner = GuiForm()
