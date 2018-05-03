@@ -20,7 +20,7 @@
 ![ocr1](https://user-images.githubusercontent.com/20757813/39425581-72684172-4c7c-11e8-850e-22197e6589e1.gif)
 
 ### youtube demo
-https://youtu.be/V9Z-fX2EBrY
+https://www.youtube.com/watch?v=ZazKdavcZlA
 
 ## Android version of the app github repo
 https://github.com/nohadrweesh/AndroidOCR
